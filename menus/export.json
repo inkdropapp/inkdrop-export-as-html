@@ -14,12 +14,7 @@
   ],
   "context-menu": {
     ".note-list-item-view": [
-      {
-        "label": "Export",
-        "submenu": [
-          { "label": "As HTML..", "command": "export:as-html" }
-        ]
-      }
+      { "label": "Export As HTML..", "command": "export:as-html" }
     ]
   }
 }
