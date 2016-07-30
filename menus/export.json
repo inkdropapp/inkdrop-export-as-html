@@ -1,0 +1,25 @@
+{
+  "menu": [
+    {
+      "label": "File",
+      "submenu": [
+        {
+          "label": "Export",
+          "submenu": [
+            { "label": "As HTML..", "command": "export:as-html" }
+          ]
+        }
+      ]
+    }
+  ],
+  "context-menu": {
+    ".note-list-item-view": [
+      {
+        "label": "Export",
+        "submenu": [
+          { "label": "As HTML..", "command": "export:as-html" }
+        ]
+      }
+    ]
+  }
+}

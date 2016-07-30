@@ -1,0 +1,12 @@
+{
+  "name": "export-as-html",
+  "description": "Export a note as HTML",
+  "main": "index",
+  "styleSheets": [],
+  "dependencies": {
+  },
+  "standard": {
+    "parser": "babel-eslint",
+    "globals": [ "inkdrop", "debug" ]
+  }
+}
