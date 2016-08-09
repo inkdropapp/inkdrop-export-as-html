@@ -6,7 +6,7 @@ const { dialog } = remote
 module.exports = {
   activate () {
     this.subscription = inkdrop.commands.add(document.body, {
-      'export:as-html': () => this.exportAsHTML()
+      'export-as-html:export': () => this.exportAsHTML()
     })
   },
 

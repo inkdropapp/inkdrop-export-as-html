@@ -1,6 +1,10 @@
 {
   "name": "export-as-html",
   "description": "Export a note as HTML",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inkdropapp/inkdrop-export-as-html.git"
+  },
   "main": "index",
   "styleSheets": [],
   "dependencies": {
