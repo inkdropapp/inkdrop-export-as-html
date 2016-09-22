@@ -2,6 +2,8 @@
 import { remote } from 'electron'
 import path from 'path'
 import fs from 'fs'
+import html from 'remark-html'
+import hljs from 'remark-highlight.js'
 const { dialog } = remote
 
 module.exports = {
@@ -28,7 +30,8 @@ module.exports = {
 
       let markdown = `# ${document.title}\n${document.body}`
       markdown = await this.replaceImages(markdown, path.dirname(pathToSave))
-      const htmlBody = MDEPreview.renderer.render(markdown)
+      const processor = MDEPreview.getRemarkProcessor().use([ html, hljs ])
+      const htmlBody = processor.process(markdown)
       const outputHtml = templateHtml.replace('{%body%}', htmlBody)
 
       if (pathToSave) {

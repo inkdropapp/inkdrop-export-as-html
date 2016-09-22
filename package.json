@@ -8,9 +8,14 @@
   "main": "index",
   "styleSheets": [],
   "dependencies": {
+    "remark-highlight.js": "^4.0.1",
+    "remark-html": "^5.0.1"
   },
   "standard": {
     "parser": "babel-eslint",
-    "globals": [ "inkdrop", "debug" ]
+    "globals": [
+      "inkdrop",
+      "debug"
+    ]
   }
 }
