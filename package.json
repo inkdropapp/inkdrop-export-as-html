@@ -9,7 +9,7 @@
   "styleSheets": [],
   "dependencies": {
     "remark-highlight.js": "^4.0.1",
-    "remark-html": "^5.0.1"
+    "remark-html": "^6.0.0"
   },
   "standard": {
     "parser": "babel-eslint",

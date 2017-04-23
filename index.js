@@ -31,7 +31,7 @@ module.exports = {
       let markdown = `# ${document.title}\n${document.body}`
       markdown = await this.replaceImages(markdown, path.dirname(pathToSave))
       const processor = MDEPreview.getRemarkProcessor().use([ html, hljs ])
-      const htmlBody = processor.process(markdown)
+      const htmlBody = await processor.process(markdown)
       const outputHtml = templateHtml.replace('{%body%}', htmlBody)
 
       if (pathToSave) {
