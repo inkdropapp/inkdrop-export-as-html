@@ -28,13 +28,13 @@ module.exports = {
         ]
       })
 
-      let markdown = `# ${document.title}\n${document.body}`
-      markdown = await this.replaceImages(markdown, path.dirname(pathToSave))
-      const processor = MDEPreview.getRemarkProcessor().use([ html, hljs ])
-      const htmlBody = await processor.process(markdown)
-      const outputHtml = templateHtml.replace('{%body%}', htmlBody)
+      if (typeof pathToSave === 'string') {
+        let markdown = `# ${document.title}\n${document.body}`
+        markdown = await this.replaceImages(markdown, path.dirname(pathToSave))
+        const processor = MDEPreview.getRemarkProcessor().use([ html, hljs ])
+        const htmlBody = await processor.process(markdown)
+        const outputHtml = templateHtml.replace('{%body%}', htmlBody)
 
-      if (pathToSave) {
         try {
           fs.writeFileSync(pathToSave, outputHtml, 'utf-8')
         } catch (e) {
