@@ -1,9 +1,8 @@
 'use babel'
+import { ReactDOM } from 'inkdrop'
 import { remote } from 'electron'
 import path from 'path'
 import fs from 'fs'
-import html from 'remark-html'
-import hljs from 'remark-highlight.js'
 const { dialog } = remote
 
 module.exports = {
@@ -16,7 +15,6 @@ module.exports = {
   async exportAsHTML () {
     const templateFilePath = path.join(__dirname, 'template.html')
     const templateHtml = fs.readFileSync(templateFilePath, 'utf-8')
-    const { MDEPreview } = inkdrop.components.classes
     const { document } = inkdrop.flux.getStore('editor').getState()
     if (document) {
       const pathToSave = dialog.showSaveDialog({
@@ -31,8 +29,7 @@ module.exports = {
       if (typeof pathToSave === 'string') {
         let markdown = `# ${document.title}\n${document.body}`
         markdown = await this.replaceImages(markdown, path.dirname(pathToSave))
-        const processor = MDEPreview.getRemarkProcessor().use([ html, hljs ])
-        const htmlBody = await processor.process(markdown)
+        const htmlBody = await this.renderHTML(markdown)
         const outputHtml = templateHtml.replace('{%body%}', htmlBody)
 
         try {
@@ -44,6 +41,23 @@ module.exports = {
     } else {
       inkdrop.notifications.addError('No note opened', { detail: 'Please open a note to export as HTML', dismissable: true })
     }
+  },
+
+  async renderHTML (markdown) {
+    const { MDEPreview } = inkdrop.components.classes
+    const processor = MDEPreview.getRemarkProcessor()
+    const file = await processor.process(markdown)
+    const container = document.createElement('div')
+    container.style.position = 'absolute'
+    container.style.zIndex = -1000
+    document.body.appendChild(container)
+
+    ReactDOM.render(file.contents, container)
+    const html = container.innerHTML
+
+    document.body.removeChild(container)
+
+    return html
   },
 
   async replaceImages (body, dirToSave) {
