@@ -33,6 +33,7 @@ module.exports = {
         const outputHtml = templateHtml
           .replace('{%body%}', htmlBody)
           .replace('{%styles%}', htmlStyles)
+          .replace('{%title%}', document.title)
 
         try {
           fs.writeFileSync(pathToSave, outputHtml, 'utf-8')
