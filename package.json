@@ -7,7 +7,9 @@
   },
   "main": "index",
   "styleSheets": [],
-  "dependencies": {},
+  "dependencies": {
+    "inkdrop-export-utils": "^1.0.0"
+  },
   "standard": {
     "parser": "babel-eslint",
     "globals": [
