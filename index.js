@@ -12,7 +12,7 @@ module.exports = {
 
   async exportAsHTML () {
     const exportUtils = require('inkdrop-export-utils')
-    const templateFilePath = path.join(__dirname, 'node_modules', 'inkdrop-export-utils', 'assets', 'template.html')
+    const templateFilePath = require.resolve(path.join('inkdrop-export-utils', 'assets', 'template.html'))
     const templateHtml = fs.readFileSync(templateFilePath, 'utf-8')
     const { document } = inkdrop.flux.getStore('editor').getState()
     if (document) {
