@@ -16,5 +16,8 @@
       "inkdrop",
       "debug"
     ]
+  },
+  "engines": {
+    "inkdrop": "^3.25.2"
   }
 }
