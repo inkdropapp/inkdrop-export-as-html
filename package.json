@@ -1,5 +1,6 @@
 {
   "name": "export-as-html",
+  "version": "1.0.0",
   "description": "Export a note as HTML",
   "repository": {
     "type": "git",
@@ -8,7 +9,7 @@
   "main": "index",
   "styleSheets": [],
   "dependencies": {
-    "inkdrop-export-utils": "^1.1.0"
+    "inkdrop-export-utils": "^2.0.0"
   },
   "standard": {
     "parser": "babel-eslint",
@@ -18,6 +19,6 @@
     ]
   },
   "engines": {
-    "inkdrop": "^3.25.2"
+    "inkdrop": "^4.x"
   }
 }

@@ -4,49 +4,94 @@ const fs = require('fs')
 const dialog = remote.dialog
 
 module.exports = {
-  activate () {
+  activate() {
     this.subscription = inkdrop.commands.add(document.body, {
-      'export-as-html:export': () => this.exportAsHTML()
+      'export-as-html:export': () => this.exportAsHtmlCommand()
     })
   },
 
-  async exportAsHTML () {
-    const exportUtils = require('inkdrop-export-utils')
-    const templateFilePath = require.resolve(path.join('inkdrop-export-utils', 'assets', 'template.html'))
-    const templateHtml = fs.readFileSync(templateFilePath, 'utf-8')
-    const { document } = inkdrop.flux.getStore('editor').getState()
-    if (document) {
-      const pathToSave = dialog.showSaveDialog({
-        title: 'Save HTML file',
-        defaultPath: `${document.title}.html`,
-        filters: [
-          { name: 'HTML Files', extensions: [ 'html' ] },
-          { name: 'All Files', extensions: [ '*' ] }
-        ]
+  async exportAsHtmlCommand() {
+    const { noteListBar, notes } = inkdrop.store.getState()
+    if (noteListBar.selectedNoteIds.length > 1) {
+      inkdrop.notifications.addInfo('Exporting notes started', {
+        detail: 'It may take a while..',
+        dismissable: true
       })
-
-      if (typeof pathToSave === 'string') {
-        let markdown = `# ${document.title}\n${document.body}`
-        markdown = await exportUtils.replaceImages(markdown, path.dirname(pathToSave))
-        const htmlBody = await exportUtils.renderHTML(markdown)
-        const htmlStyles = exportUtils.getStylesheets()
-        const outputHtml = templateHtml
-          .replace('{%body%}', htmlBody)
-          .replace('{%styles%}', htmlStyles)
-          .replace('{%title%}', document.title)
-
-        try {
-          fs.writeFileSync(pathToSave, outputHtml, 'utf-8')
-        } catch (e) {
-          inkdrop.notifications.addError('Failed to save HTML', e.stack)
-        }
-      }
+      await this.exportMultipleNotesAsHtml(noteListBar.selectedNoteIds)
+      inkdrop.notifications.addInfo('Exporting notes completed', {
+        detail: '',
+        dismissable: true
+      })
+    } else if (noteListBar.selectedNoteIds.length === 1) {
+      const note = notes.hashedItems[noteListBar.selectedNoteIds[0]]
+      this.exportNoteAsHtml(note)
     } else {
-      inkdrop.notifications.addError('No note opened', { detail: 'Please open a note to export as HTML', dismissable: true })
+      inkdrop.notifications.addError('No note opened', {
+        detail: 'Please open a note to export as HTML',
+        dismissable: true
+      })
     }
   },
 
-  deactivate () {
+  async exportMultipleNotesAsHtml(noteIds) {
+    const { notes } = inkdrop.store.getState()
+    const res = dialog.showOpenDialog(inkdrop.window, {
+      title: 'Select Destination Directory',
+      properties: ['openDirectory']
+    })
+    if (res instanceof Array && res.length > 0) {
+      const destDir = res[0]
+
+      for (noteId of noteIds) {
+        const note = notes.hashedItems[noteId]
+        if (note) {
+          const pathToSave = path.join(destDir, `${note.title}.html`)
+          await this.exportNoteAsHtml(note, pathToSave)
+        }
+      }
+    }
+  },
+
+  async exportNoteAsHtml(note, pathToSave) {
+    const exportUtils = require('inkdrop-export-utils')
+    const templateFilePath = require.resolve(
+      path.join('inkdrop-export-utils', 'assets', 'template.html')
+    )
+    const templateHtml = fs.readFileSync(templateFilePath, 'utf-8')
+
+    if (typeof pathToSave !== 'string') {
+      pathToSave = dialog.showSaveDialog(inkdrop.window, {
+        title: 'Save HTML file',
+        defaultPath: `${note.title}.html`,
+        filters: [
+          { name: 'HTML Files', extensions: ['html'] },
+          { name: 'All Files', extensions: ['*'] }
+        ]
+      })
+    }
+
+    if (typeof pathToSave === 'string') {
+      let markdown = `# ${note.title}\n${note.body}`
+      markdown = await exportUtils.replaceImages(
+        markdown,
+        path.dirname(pathToSave)
+      )
+      const htmlBody = await exportUtils.renderHTML(markdown)
+      const htmlStyles = exportUtils.getStylesheets()
+      const outputHtml = templateHtml
+        .replace('{%body%}', htmlBody)
+        .replace('{%styles%}', htmlStyles)
+        .replace('{%title%}', note.title)
+
+      try {
+        fs.writeFileSync(pathToSave, outputHtml, 'utf-8')
+      } catch (e) {
+        inkdrop.notifications.addError('Failed to save HTML', e.stack)
+      }
+    }
+  },
+
+  deactivate() {
     this.subscription.dispose()
   }
 }
