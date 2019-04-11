@@ -9,7 +9,7 @@
   "main": "index",
   "styleSheets": [],
   "dependencies": {
-    "inkdrop-export-utils": "^2.0.0"
+    "inkdrop-export-utils": "^2.1.0"
   },
   "standard": {
     "parser": "babel-eslint",
