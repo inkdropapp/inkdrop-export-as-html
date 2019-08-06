@@ -86,7 +86,10 @@ module.exports = {
       try {
         fs.writeFileSync(pathToSave, outputHtml, 'utf-8')
       } catch (e) {
-        inkdrop.notifications.addError('Failed to save HTML', e.stack)
+        inkdrop.notifications.addError('Failed to save HTML', {
+          detail: e.message,
+          dismissable: true
+        })
       }
     }
   },
