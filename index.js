@@ -72,9 +72,11 @@ module.exports = {
 
     if (typeof pathToSave === 'string') {
       let markdown = `# ${note.title}\n${note.body}`
+      const dirToSave = path.dirname(pathToSave)
       markdown = await exportUtils.replaceImages(
         markdown,
-        path.dirname(pathToSave)
+        dirToSave,
+        dirToSave
       )
       const htmlBody = await exportUtils.renderHTML(markdown)
       const htmlStyles = exportUtils.getStylesheets()
