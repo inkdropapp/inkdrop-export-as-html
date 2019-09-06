@@ -35,7 +35,7 @@ module.exports = {
 
   async exportMultipleNotesAsHtml(noteIds) {
     const { notes } = inkdrop.store.getState()
-    const res = dialog.showOpenDialog(inkdrop.window, {
+    const { filePaths: res } = await dialog.showOpenDialog(inkdrop.window, {
       title: 'Select Destination Directory',
       properties: ['openDirectory']
     })
@@ -54,13 +54,9 @@ module.exports = {
 
   async exportNoteAsHtml(note, pathToSave) {
     const exportUtils = require('inkdrop-export-utils')
-    const templateFilePath = require.resolve(
-      path.join('inkdrop-export-utils', 'assets', 'template.html')
-    )
-    const templateHtml = fs.readFileSync(templateFilePath, 'utf-8')
 
     if (typeof pathToSave !== 'string') {
-      pathToSave = dialog.showSaveDialog(inkdrop.window, {
+      const res = await dialog.showSaveDialog(inkdrop.window, {
         title: 'Save HTML file',
         defaultPath: `${note.title}.html`,
         filters: [
@@ -68,6 +64,7 @@ module.exports = {
           { name: 'All Files', extensions: ['*'] }
         ]
       })
+      pathToSave = res.filePath
     }
 
     if (typeof pathToSave === 'string') {
@@ -78,12 +75,7 @@ module.exports = {
         dirToSave,
         dirToSave
       )
-      const htmlBody = await exportUtils.renderHTML(markdown)
-      const htmlStyles = exportUtils.getStylesheets()
-      const outputHtml = templateHtml
-        .replace('{%body%}', htmlBody)
-        .replace('{%styles%}', htmlStyles)
-        .replace('{%title%}', note.title)
+      const outputHtml = await exportUtils.createHTML({ ...note, body: markdown })
 
       try {
         fs.writeFileSync(pathToSave, outputHtml, 'utf-8')
