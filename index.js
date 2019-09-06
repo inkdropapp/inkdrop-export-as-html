@@ -68,14 +68,13 @@ module.exports = {
     }
 
     if (typeof pathToSave === 'string') {
-      let markdown = `# ${note.title}\n${note.body}`
+      let markdown = note.body
       const dirToSave = path.dirname(pathToSave)
-      markdown = await exportUtils.replaceImages(
-        markdown,
-        dirToSave,
-        dirToSave
-      )
-      const outputHtml = await exportUtils.createHTML({ ...note, body: markdown })
+      markdown = await exportUtils.replaceImages(markdown, dirToSave, dirToSave)
+      const outputHtml = await exportUtils.createHTML({
+        ...note,
+        body: markdown
+      })
 
       try {
         fs.writeFileSync(pathToSave, outputHtml, 'utf-8')
