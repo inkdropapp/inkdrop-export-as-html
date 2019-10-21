@@ -1,6 +1,6 @@
 {
   "name": "export-as-html",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Export a note as HTML",
   "repository": {
     "type": "git",
