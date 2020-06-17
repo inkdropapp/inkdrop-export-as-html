@@ -67,7 +67,7 @@ module.exports = {
       pathToSave = res.filePath
     }
 
-    if (typeof pathToSave === 'string') {
+    if (typeof pathToSave === 'string' && pathToSave.length > 0) {
       let markdown = note.body
       const dirToSave = path.dirname(pathToSave)
       markdown = await exportUtils.replaceImages(markdown, dirToSave, dirToSave)
