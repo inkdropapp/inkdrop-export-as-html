@@ -42,7 +42,7 @@ module.exports = {
     if (res instanceof Array && res.length > 0) {
       const destDir = res[0]
 
-      for (noteId of noteIds) {
+      for (let noteId of noteIds) {
         const note = notes.hashedItems[noteId]
         if (note) {
           const pathToSave = path.join(destDir, `${note.title}.html`)
