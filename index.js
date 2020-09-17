@@ -1,4 +1,4 @@
-const remote = require('electron').remote
+const { remote, clipboard } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const dialog = remote.dialog
@@ -6,30 +6,41 @@ const dialog = remote.dialog
 module.exports = {
   activate() {
     this.subscription = inkdrop.commands.add(document.body, {
-      'export-as-html:export': () => this.exportAsHtmlCommand()
+      'export-as-html:export': () => this.exportAsHtmlCommand(),
+      'export-as-html:copy': () => this.copyAsHtmlCommand()
     })
   },
 
   async exportAsHtmlCommand() {
     const { noteListBar, notes } = inkdrop.store.getState()
-    if (noteListBar.selectedNoteIds.length > 1) {
+    const { actionTargetNoteIds } = noteListBar
+    if(actionTargetNoteIds && actionTargetNoteIds.length > 1) {
       inkdrop.notifications.addInfo('Exporting notes started', {
         detail: 'It may take a while..',
         dismissable: true
       })
-      await this.exportMultipleNotesAsHtml(noteListBar.selectedNoteIds)
+      await this.exportMultipleNotesAsHtml(actionTargetNoteIds)
       inkdrop.notifications.addInfo('Exporting notes completed', {
         detail: '',
         dismissable: true
       })
-    } else if (noteListBar.selectedNoteIds.length === 1) {
-      const note = notes.hashedItems[noteListBar.selectedNoteIds[0]]
+    } else if (actionTargetNoteIds.length === 1) {
+      const note = notes.hashedItems[actionTargetNoteIds[0]]
       this.exportNoteAsHtml(note)
     } else {
       inkdrop.notifications.addError('No note opened', {
         detail: 'Please open a note to export as HTML',
         dismissable: true
       })
+    }
+  },
+
+  async copyAsHtmlCommand() {
+    const { noteListBar, notes } = inkdrop.store.getState()
+    const { actionTargetNoteIds } = noteListBar
+    if(actionTargetNoteIds && actionTargetNoteIds.length > 0) {
+      const note = notes.hashedItems[actionTargetNoteIds[0]]
+      this.copyNoteAsHtml(note)
     }
   },
 
@@ -53,8 +64,6 @@ module.exports = {
   },
 
   async exportNoteAsHtml(note, pathToSave) {
-    const exportUtils = require('inkdrop-export-utils')
-
     if (typeof pathToSave !== 'string') {
       const res = await dialog.showSaveDialog(inkdrop.window, {
         title: 'Save HTML file',
@@ -67,24 +76,43 @@ module.exports = {
       pathToSave = res.filePath
     }
 
-    if (typeof pathToSave === 'string' && pathToSave.length > 0) {
+    const outputHtml = await this.generateHtml(note, { pathToSave })
+
+    try {
+      fs.writeFileSync(pathToSave, outputHtml, 'utf-8')
+    } catch (e) {
+      inkdrop.notifications.addError('Failed to save HTML', {
+        detail: e.message,
+        dismissable: true
+      })
+    }
+  },
+
+  async copyNoteAsHtml(note) {
+    const html = await this.generateHtml(note, {
+      createHTMLOptions: {
+        addTitle: false
+      }
+    })
+    clipboard.writeHTML(html)
+  },
+
+  async generateHtml(note, opts = {}) {
+    const exportUtils = require('inkdrop-export-utils')
+    const { pathToSave, createHTMLOptions } = opts
       let markdown = note.body
+
+    if (typeof pathToSave === 'string' && pathToSave.length > 0) {
       const dirToSave = path.dirname(pathToSave)
       markdown = await exportUtils.replaceImages(markdown, dirToSave, dirToSave)
-      const outputHtml = await exportUtils.createHTML({
-        ...note,
-        body: markdown
-      })
-
-      try {
-        fs.writeFileSync(pathToSave, outputHtml, 'utf-8')
-      } catch (e) {
-        inkdrop.notifications.addError('Failed to save HTML', {
-          detail: e.message,
-          dismissable: true
-        })
-      }
     }
+
+    const outputHtml = await exportUtils.createHTML({
+      ...note,
+      body: markdown
+    }, createHTMLOptions)
+
+    return outputHtml
   },
 
   deactivate() {
