@@ -89,12 +89,17 @@ module.exports = {
   },
 
   async copyNoteAsHtml(note) {
-    const html = await this.generateHtml(note, {
+    const { replaceHTMLImagesWithDataURI } = require('inkdrop-export-utils')
+    let html = await this.generateHtml(note, {
       createHTMLOptions: {
         addTitle: false
       }
     })
-    clipboard.writeHTML(html)
+    html = await replaceHTMLImagesWithDataURI(html)
+    clipboard.write({
+      html,
+      text: html
+    })
   },
 
   async generateHtml(note, opts = {}) {
