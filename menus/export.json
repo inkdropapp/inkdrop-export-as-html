@@ -6,7 +6,7 @@
         {
           "label": "Export",
           "submenu": [
-            { "label": "As HTML..", "command": "export-as-html:export" }
+            { "label": "As HTML..", "command": "export-as-html:selections" }
           ]
         }
       ]
@@ -14,8 +14,11 @@
   ],
   "context-menu": {
     ".note-list-item-view": [
-      { "label": "Export As HTML..", "command": "export-as-html:export" },
+      { "label": "Export As HTML..", "command": "export-as-html:selections" },
       { "label": "Copy As HTML", "command": "export-as-html:copy" }
+    ],
+    ".sidebar-menu .sidebar-menu-book-list-item, .sidebar-book-filter-menu .sidebar-menu-book-list-item": [
+      { "label": "Export as HTML..", "command": "export-as-html:notebook" }
     ]
   }
 }
