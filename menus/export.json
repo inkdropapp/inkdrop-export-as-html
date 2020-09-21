@@ -13,8 +13,10 @@
     }
   ],
   "context-menu": {
-    ".note-list-item-view": [
-      { "label": "Export As HTML..", "command": "export-as-html:selections" },
+    ".note-list-bar .note-list-item-view": [
+      { "label": "Export As HTML..", "command": "export-as-html:selections" }
+    ],
+    ".note-list-bar:not(.multiple-selection) .note-list-item-view": [
       { "label": "Copy As HTML", "command": "export-as-html:copy" },
       {
         "label": "Copy As Simple HTML",
