@@ -10,6 +10,7 @@ module.exports = {
   exportMultipleNotesAsHtml,
   exportNoteAsHtml,
   copyNoteAsHtml,
+  copyNoteAsSimpleHtml,
   exportNotesInBook
 }
 
@@ -52,7 +53,7 @@ async function exportNoteAsHtml(note, pathToSave) {
       await exportNote(note, destDir, fileName)
     } catch (e) {
       logger.error('Failed to save HTML:', e)
-      inkdrop.notifications.addError('Failed to save HTML', {
+      inkdrop.notifications.addError('Failed to save as HTML', {
         detail: e.message,
         dismissable: true
       })
@@ -62,16 +63,34 @@ async function exportNoteAsHtml(note, pathToSave) {
 
 async function copyNoteAsHtml(note) {
   const { replaceHTMLImagesWithDataURI } = require('inkdrop-export-utils')
-  let html = await generateHtml(note, {
-    createHTMLOptions: {
-      addTitle: false
-    }
-  })
-  html = await replaceHTMLImagesWithDataURI(html)
-  clipboard.write({
-    html,
-    text: html
-  })
+  try {
+    let html = await generateHtml(note, {
+      createHTMLOptions: { addTitle: false }
+    })
+    html = await replaceHTMLImagesWithDataURI(html)
+    clipboard.write({ html, text: html })
+  } catch (e) {
+    logger.error('Failed to copy as html:', e)
+    inkdrop.notifications.addError('Failed to copy as html', {
+      detail: e.message,
+      dismissable: true
+    })
+  }
+}
+
+async function copyNoteAsSimpleHtml(note) {
+  const { replaceHTMLImagesWithDataURI } = require('inkdrop-export-utils')
+  try {
+    let html = await generateSimpleHtml(note)
+    html = await replaceHTMLImagesWithDataURI(html)
+    clipboard.write({ html, text: html })
+  } catch (e) {
+    logger.error('Failed to copy as simple html:', e)
+    inkdrop.notifications.addError('Failed to copy as simple html', {
+      detail: e.message,
+      dismissable: true
+    })
+  }
 }
 
 async function exportNotesInBook(bookId) {
@@ -157,6 +176,20 @@ async function generateHtml(note, opts = {}) {
   }, createHTMLOptions)
 
   return outputHtml
+}
+
+async function generateSimpleHtml(note, opts = {}) {
+  const exportUtils = require('inkdrop-export-utils')
+  const { pathToSave, createHTMLOptions } = opts
+  const remark = require('unified')()
+    .use(require('remark-parse'))
+    .use(require('remark-frontmatter'))
+    .use(require('remark-rehype'))
+    .use(require('rehype-format'))
+    .use(require('rehype-stringify'))
+  const result = await remark.process(note.body)
+
+  return result.contents
 }
 
 function findNoteFromTree(bookId, tree) {

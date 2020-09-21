@@ -8,6 +8,7 @@ module.exports = {
     this.subscription = inkdrop.commands.add(document.body, {
       'export-as-html:selections': () => this.exportAsHtmlCommand(),
       'export-as-html:copy': () => this.copyAsHtmlCommand(),
+      'export-as-html:copy-simple': () => this.copyAsSimpleHtmlCommand(),
       'export-as-html:notebook': (e) => this.exportNotebook(e)
     })
   },
@@ -48,6 +49,16 @@ module.exports = {
     if(actionTargetNoteIds && actionTargetNoteIds.length > 0) {
       const note = notes.hashedItems[actionTargetNoteIds[0]]
       copyNoteAsHtml(note)
+    }
+  },
+
+  async copyAsSimpleHtmlCommand() {
+    const { copyNoteAsSimpleHtml } = require('./exporter')
+    const { noteListBar, notes } = inkdrop.store.getState()
+    const { actionTargetNoteIds } = noteListBar
+    if(actionTargetNoteIds && actionTargetNoteIds.length > 0) {
+      const note = notes.hashedItems[actionTargetNoteIds[0]]
+      copyNoteAsSimpleHtml(note)
     }
   },
 
