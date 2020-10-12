@@ -4,6 +4,7 @@ const path = require('path')
 const sanitize = require('sanitize-filename')
 const fs = require('fs')
 const touch = require('touch')
+const { Note } = require('inkdrop').models
 const dialog = remote.dialog
 
 module.exports = {
@@ -24,7 +25,7 @@ async function exportMultipleNotesAsHtml(noteIds) {
     const destDir = res[0]
 
     for (let noteId of noteIds) {
-      const note = notes.hashedItems[noteId]
+      const note = await Note.loadWithId(noteId)
       if (note) {
         const fileName = `${note.title}.html`
         await exportNote(note, destDir, fileName)

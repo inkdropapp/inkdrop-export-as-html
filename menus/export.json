@@ -6,7 +6,12 @@
         {
           "label": "Export",
           "submenu": [
-            { "label": "As HTML..", "command": "export-as-html:selections" }
+            { "label": "As HTML..", "command": "export-as-html:selections" },
+            { "label": "Copy As HTML", "command": "export-as-html:copy" },
+            {
+              "label": "Copy As Simple HTML",
+              "command": "export-as-html:copy-simple"
+            }
           ]
         }
       ]

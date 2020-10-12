@@ -2,6 +2,7 @@ const { remote, clipboard } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const dialog = remote.dialog
+const { Note } = require('inkdrop').models
 
 module.exports = {
   activate() {
@@ -32,7 +33,7 @@ module.exports = {
         dismissable: true
       })
     } else if (actionTargetNoteIds.length === 1) {
-      const note = notes.hashedItems[actionTargetNoteIds[0]]
+      const note = await Note.loadWithId(actionTargetNoteIds[0])
       exportNoteAsHtml(note)
     } else {
       inkdrop.notifications.addError('No note opened', {
@@ -47,7 +48,7 @@ module.exports = {
     const { noteListBar, notes } = inkdrop.store.getState()
     const { actionTargetNoteIds } = noteListBar
     if(actionTargetNoteIds && actionTargetNoteIds.length > 0) {
-      const note = notes.hashedItems[actionTargetNoteIds[0]]
+      const note = await Note.loadWithId(actionTargetNoteIds[0])
       copyNoteAsHtml(note)
     }
   },
@@ -57,7 +58,7 @@ module.exports = {
     const { noteListBar, notes } = inkdrop.store.getState()
     const { actionTargetNoteIds } = noteListBar
     if(actionTargetNoteIds && actionTargetNoteIds.length > 0) {
-      const note = notes.hashedItems[actionTargetNoteIds[0]]
+      const note = await Note.loadWithId(actionTargetNoteIds[0])
       copyNoteAsSimpleHtml(note)
     }
   },
