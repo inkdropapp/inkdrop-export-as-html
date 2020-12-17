@@ -165,7 +165,7 @@ async function exportNote(note, pathToSave, fileName) {
 async function generateHtml(note, opts = {}) {
   const exportUtils = require('inkdrop-export-utils')
   const { pathToSave, createHTMLOptions } = opts
-    let markdown = note.body
+  let markdown = note.body
 
   if (typeof pathToSave === 'string' && pathToSave.length > 0) {
     markdown = await exportUtils.replaceImages(markdown, pathToSave, pathToSave)
