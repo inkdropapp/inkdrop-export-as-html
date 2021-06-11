@@ -9,7 +9,7 @@
   "main": "index",
   "styleSheets": [],
   "dependencies": {
-    "inkdrop-export-utils": "^3.2.6",
+    "inkdrop-export-utils": "^3.2.7",
     "rehype-format": "^3.1.0",
     "rehype-stringify": "^8.0.0",
     "remark-frontmatter": "^2.0.0",
