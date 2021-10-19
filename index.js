@@ -1,7 +1,3 @@
-const { remote, clipboard } = require('electron')
-const path = require('path')
-const fs = require('fs')
-const dialog = remote.dialog
 const { Note } = require('inkdrop').models
 
 module.exports = {
@@ -10,7 +6,7 @@ module.exports = {
       'export-as-html:selections': () => this.exportAsHtmlCommand(),
       'export-as-html:copy': () => this.copyAsHtmlCommand(),
       'export-as-html:copy-simple': () => this.copyAsSimpleHtmlCommand(),
-      'export-as-html:notebook': (e) => this.exportNotebook(e)
+      'export-as-html:notebook': e => this.exportNotebook(e)
     })
   },
 
@@ -19,10 +15,13 @@ module.exports = {
   },
 
   async exportAsHtmlCommand() {
-    const { exportMultipleNotesAsHtml, exportNoteAsHtml } = require('./exporter')
+    const {
+      exportMultipleNotesAsHtml,
+      exportNoteAsHtml
+    } = require('./exporter')
     const { noteListBar, notes } = inkdrop.store.getState()
     const { actionTargetNoteIds } = noteListBar
-    if(actionTargetNoteIds && actionTargetNoteIds.length > 1) {
+    if (actionTargetNoteIds && actionTargetNoteIds.length > 1) {
       inkdrop.notifications.addInfo('Exporting notes started', {
         detail: 'It may take a while..',
         dismissable: true
@@ -47,7 +46,7 @@ module.exports = {
     const { copyNoteAsHtml } = require('./exporter')
     const { noteListBar, notes } = inkdrop.store.getState()
     const { actionTargetNoteIds } = noteListBar
-    if(actionTargetNoteIds && actionTargetNoteIds.length > 0) {
+    if (actionTargetNoteIds && actionTargetNoteIds.length > 0) {
       const note = await Note.loadWithId(actionTargetNoteIds[0])
       copyNoteAsHtml(note)
     }
@@ -57,7 +56,7 @@ module.exports = {
     const { copyNoteAsSimpleHtml } = require('./exporter')
     const { noteListBar, notes } = inkdrop.store.getState()
     const { actionTargetNoteIds } = noteListBar
-    if(actionTargetNoteIds && actionTargetNoteIds.length > 0) {
+    if (actionTargetNoteIds && actionTargetNoteIds.length > 0) {
       const note = await Note.loadWithId(actionTargetNoteIds[0])
       copyNoteAsSimpleHtml(note)
     }
