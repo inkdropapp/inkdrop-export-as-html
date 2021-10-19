@@ -1,4 +1,5 @@
-const { remote, clipboard } = require('electron')
+const remote = require('@electron/remote')
+const { clipboard } = require('electron')
 const { logger } = require('inkdrop')
 const path = require('path')
 const sanitize = require('sanitize-filename')
@@ -171,10 +172,13 @@ async function generateHtml(note, opts = {}) {
     markdown = await exportUtils.replaceImages(markdown, pathToSave, pathToSave)
   }
 
-  const outputHtml = await exportUtils.createHTML({
-    ...note,
-    body: markdown
-  }, createHTMLOptions)
+  const outputHtml = await exportUtils.createHTML(
+    {
+      ...note,
+      body: markdown
+    },
+    createHTMLOptions
+  )
 
   return outputHtml
 }
