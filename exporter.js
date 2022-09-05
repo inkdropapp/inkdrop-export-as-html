@@ -104,7 +104,7 @@ async function exportNotesInBook(bookId) {
     title: `Select a directory to export a book "${book.name}"`,
     properties: ['openDirectory', 'createDirectory']
   })
-  if (pathArrayToSave) {
+  if (pathArrayToSave instanceof Array && pathArrayToSave.length > 0) {
     const [pathToSave] = pathArrayToSave
     try {
       await exportBook(pathToSave, book, { createBookDir: false })
