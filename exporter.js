@@ -147,7 +147,7 @@ async function exportBook(parentDir, book, opts = {}) {
 }
 
 async function exportNote(note, pathToSave, fileName) {
-  if (note.body) {
+  if (typeof note.body === 'string') {
     const datestr = new Date(note.createdAt)
       .toISOString()
       .split('T')[0]
