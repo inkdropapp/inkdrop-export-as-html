@@ -13,7 +13,7 @@
     "rehype-format": "^3.1.0",
     "rehype-stringify": "^8.0.0",
     "remark-frontmatter": "^2.0.0",
-    "remark-parse": "^8.0.3",
+    "remark-parse": "^10.0.1",
     "remark-rehype": "^7.0.0",
     "sanitize-filename": "^1.6.3",
     "touch": "^3.1.0",
