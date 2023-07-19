@@ -1,10 +1,9 @@
 const remote = require('@electron/remote')
 const { clipboard } = require('electron')
-const { logger } = require('inkdrop')
+const { logger, exportUtils } = require('inkdrop')
 const path = require('path')
 const sanitize = require('sanitize-filename')
 const fs = require('fs')
-const touch = require('touch')
 const { Note } = require('inkdrop').models
 const dialog = remote.dialog
 
@@ -17,7 +16,6 @@ module.exports = {
 }
 
 async function exportMultipleNotesAsHtml(noteIds) {
-  const { notes } = inkdrop.store.getState()
   const { filePaths: res } = await dialog.showOpenDialog(inkdrop.window, {
     title: 'Select Destination Directory',
     properties: ['openDirectory']
@@ -29,7 +27,7 @@ async function exportMultipleNotesAsHtml(noteIds) {
       const note = await Note.loadWithId(noteId)
       if (note) {
         const fileName = `${note.title}.html`
-        await exportNote(note, destDir, fileName)
+        await exportUtils.exportNote(note, destDir, fileName)
       }
     }
   }
@@ -52,7 +50,7 @@ async function exportNoteAsHtml(note, pathToSave) {
     try {
       const destDir = path.dirname(pathToSave)
       const fileName = path.basename(pathToSave)
-      await exportNote(note, destDir, fileName)
+      await exportUtils.exportNote(note, destDir, fileName)
     } catch (e) {
       logger.error('Failed to save HTML:', e)
       inkdrop.notifications.addError('Failed to save as HTML', {
@@ -64,12 +62,12 @@ async function exportNoteAsHtml(note, pathToSave) {
 }
 
 async function copyNoteAsHtml(note) {
-  const { replaceHTMLImagesWithDataURI } = require('inkdrop-export-utils')
   try {
-    let html = await generateHtml(note, {
-      createHTMLOptions: { addTitle: false }
-    })
-    html = await replaceHTMLImagesWithDataURI(html)
+    const processor = await exportUtils.getProcessorForNote(note)
+    if (!processor) return false
+
+    await processor.replaceAttachmentImagesWithDataURI()
+    const html = await processor.createHTMLWithTemplate(note.title)
     clipboard.write({ html, text: html })
   } catch (e) {
     logger.error('Failed to copy as html:', e)
@@ -81,10 +79,12 @@ async function copyNoteAsHtml(note) {
 }
 
 async function copyNoteAsSimpleHtml(note) {
-  const { replaceHTMLImagesWithDataURI } = require('inkdrop-export-utils')
   try {
-    let html = await generateSimpleHtml(note)
-    html = await replaceHTMLImagesWithDataURI(html)
+    const processor = await exportUtils.getProcessorForNote(note)
+    if (!processor) return false
+
+    await processor.replaceAttachmentImagesWithDataURI()
+    const html = await processor.stringifySimple()
     clipboard.write({ html, text: html })
   } catch (e) {
     logger.error('Failed to copy as simple html:', e)
@@ -136,7 +136,7 @@ async function exportBook(parentDir, book, opts = {}) {
 
   !fs.existsSync(pathToSave) && fs.mkdirSync(pathToSave)
   for (let i = 0; i < notes.length; ++i) {
-    await exportNote(notes[i], pathToSave)
+    await exportUtils.exportNote(notes[i], pathToSave)
   }
 
   if (book.children) {
@@ -144,57 +144,6 @@ async function exportBook(parentDir, book, opts = {}) {
       return promise.then(() => exportBook(pathToSave, childBook))
     }, Promise.resolve())
   }
-}
-
-async function exportNote(note, pathToSave, fileName) {
-  if (typeof note.body === 'string') {
-    const datestr = new Date(note.createdAt)
-      .toISOString()
-      .split('T')[0]
-      .replace(/-/g, '')
-    fileName =
-      fileName ||
-      sanitize(datestr + '-' + note.title + '-' + note._id.substr(5)) + '.html'
-    const filePath = path.join(pathToSave, fileName)
-    const outputHtml = await generateHtml(note, { pathToSave })
-
-    fs.writeFileSync(filePath, outputHtml, 'utf-8')
-    touch.sync(filePath, { time: new Date(note.updatedAt) })
-  }
-}
-
-async function generateHtml(note, opts = {}) {
-  const exportUtils = require('inkdrop-export-utils')
-  const { pathToSave, createHTMLOptions } = opts
-  let markdown = note.body
-
-  if (typeof pathToSave === 'string' && pathToSave.length > 0) {
-    markdown = await exportUtils.replaceImages(markdown, pathToSave, pathToSave)
-  }
-
-  const outputHtml = await exportUtils.createHTML(
-    {
-      ...note,
-      body: markdown
-    },
-    createHTMLOptions
-  )
-
-  return outputHtml
-}
-
-async function generateSimpleHtml(note, opts = {}) {
-  const exportUtils = require('inkdrop-export-utils')
-  const { pathToSave, createHTMLOptions } = opts
-  const remark = require('unified')()
-    .use(require('remark-parse'))
-    .use(require('remark-frontmatter'))
-    .use(require('remark-rehype'))
-    .use(require('rehype-format'))
-    .use(require('rehype-stringify'))
-  const result = await remark.process(note.body)
-
-  return result.contents
 }
 
 function findNoteFromTree(bookId, tree) {

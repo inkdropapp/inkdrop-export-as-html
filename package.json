@@ -9,15 +9,7 @@
   "main": "index",
   "styleSheets": [],
   "dependencies": {
-    "inkdrop-export-utils": "^3.3.0",
-    "rehype-format": "^4.0.1",
-    "rehype-stringify": "^9.0.3",
-    "remark-frontmatter": "^4.0.1",
-    "remark-parse": "^10.0.2",
-    "remark-rehype": "^10.1.0",
-    "sanitize-filename": "^1.6.3",
-    "touch": "^3.1.0",
-    "unified": "^10.1.2"
+    "sanitize-filename": "^1.6.3"
   },
   "engines": {
     "inkdrop": "^5.x"
