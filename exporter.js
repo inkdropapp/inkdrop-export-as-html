@@ -27,7 +27,7 @@ async function exportMultipleNotesAsHtml(noteIds) {
       const note = await Note.loadWithId(noteId)
       if (note) {
         const fileName = `${note.title}.html`
-        await exportUtils.exportNote(note, destDir, fileName)
+        await exportUtils.exportNoteAsHtml(note, destDir, fileName)
       }
     }
   }
@@ -50,7 +50,7 @@ async function exportNoteAsHtml(note, pathToSave) {
     try {
       const destDir = path.dirname(pathToSave)
       const fileName = path.basename(pathToSave)
-      await exportUtils.exportNote(note, destDir, fileName)
+      await exportUtils.exportNoteAsHtml(note, destDir, fileName)
     } catch (e) {
       logger.error('Failed to save HTML:', e)
       inkdrop.notifications.addError('Failed to save as HTML', {
@@ -136,7 +136,7 @@ async function exportBook(parentDir, book, opts = {}) {
 
   !fs.existsSync(pathToSave) && fs.mkdirSync(pathToSave)
   for (let i = 0; i < notes.length; ++i) {
-    await exportUtils.exportNote(notes[i], pathToSave)
+    await exportUtils.exportNoteAsHtml(notes[i], pathToSave)
   }
 
   if (book.children) {
