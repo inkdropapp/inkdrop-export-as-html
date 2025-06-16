@@ -12,6 +12,6 @@
     "sanitize-filename": "^1.6.3"
   },
   "engines": {
-    "inkdrop": "^5.x"
+    "inkdrop": "^6.x"
   }
 }
