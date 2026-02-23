@@ -127,7 +127,7 @@ async function exportNotesInBook(bookId) {
 
 async function exportBook(parentDir, book, opts = {}) {
   const { createBookDir = true } = opts
-  const db = inkdrop.main.dataStore.getLocalDB()
+  const db = inkdrop.localDB
   const dirName = sanitize(book.name, { replacement: '-' })
   const pathToSave = createBookDir ? path.join(parentDir, dirName) : parentDir
   const { docs: notes } = await db.notes.findInBook(book._id, {
