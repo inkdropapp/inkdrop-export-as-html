@@ -1,11 +1,9 @@
-const remote = require('@electron/remote')
 const { clipboard } = require('electron')
 const { logger, exportUtils } = require('inkdrop')
 const path = require('path')
 const sanitize = require('sanitize-filename')
 const fs = require('fs')
 const { Note } = require('inkdrop').models
-const dialog = remote.dialog
 
 module.exports = {
   exportMultipleNotesAsHtml,
@@ -16,10 +14,13 @@ module.exports = {
 }
 
 async function exportMultipleNotesAsHtml(noteIds) {
-  const { filePaths: res } = await dialog.showOpenDialog(inkdrop.window, {
-    title: 'Select Destination Directory',
-    properties: ['openDirectory']
-  })
+  const { filePaths: res } = await inkdrop.dialog.showOpenDialog(
+    inkdrop.window,
+    {
+      title: 'Select Destination Directory',
+      properties: ['openDirectory']
+    }
+  )
   if (res instanceof Array && res.length > 0) {
     const destDir = res[0]
 
@@ -35,7 +36,7 @@ async function exportMultipleNotesAsHtml(noteIds) {
 
 async function exportNoteAsHtml(note, pathToSave) {
   if (typeof pathToSave !== 'string') {
-    const res = await dialog.showSaveDialog(inkdrop.window, {
+    const res = await inkdrop.dialog.showSaveDialog(inkdrop.window, {
       title: 'Save HTML file',
       defaultPath: `${note.title}.html`,
       filters: [
@@ -100,7 +101,7 @@ async function exportNotesInBook(bookId) {
   if (!book) {
     throw new Error('Notebook not found: ' + bookId)
   }
-  const { filePaths: pathArrayToSave } = await dialog.showOpenDialog({
+  const { filePaths: pathArrayToSave } = await inkdrop.dialog.showOpenDialog({
     title: `Select a directory to export a book "${book.name}"`,
     properties: ['openDirectory', 'createDirectory']
   })
