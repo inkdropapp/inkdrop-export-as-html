@@ -14,13 +14,10 @@ module.exports = {
 }
 
 async function exportMultipleNotesAsHtml(noteIds) {
-  const { filePaths: res } = await inkdrop.dialog.showOpenDialog(
-    inkdrop.window,
-    {
-      title: 'Select Destination Directory',
-      properties: ['openDirectory']
-    }
-  )
+  const { filePaths: res } = await inkdrop.dialog.showOpenDialog({
+    title: 'Select Destination Directory',
+    properties: ['openDirectory']
+  })
   if (res instanceof Array && res.length > 0) {
     const destDir = res[0]
 
@@ -36,7 +33,8 @@ async function exportMultipleNotesAsHtml(noteIds) {
 
 async function exportNoteAsHtml(note, pathToSave) {
   if (typeof pathToSave !== 'string') {
-    const res = await inkdrop.dialog.showSaveDialog(inkdrop.window, {
+    console.error('showSave dialog:', `${note.title}.html`)
+    const res = await inkdrop.dialog.showSaveDialog({
       title: 'Save HTML file',
       defaultPath: `${note.title}.html`,
       filters: [
