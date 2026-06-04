@@ -3,9 +3,9 @@ const { Note } = require('inkdrop').models
 module.exports = {
   activate() {
     this.subscription = inkdrop.commands.add(document.body, {
-      'export-as-html:selections': () => this.exportAsHtmlCommand(),
-      'export-as-html:copy': () => this.copyAsHtmlCommand(),
-      'export-as-html:copy-simple': () => this.copyAsSimpleHtmlCommand(),
+      'export-as-html:selections': e => this.exportAsHtmlCommand(e),
+      'export-as-html:copy': e => this.copyAsHtmlCommand(e),
+      'export-as-html:copy-simple': e => this.copyAsSimpleHtmlCommand(e),
       'export-as-html:notebook': e => this.exportNotebook(e)
     })
   },
@@ -14,25 +14,26 @@ module.exports = {
     this.subscription.dispose()
   },
 
-  async exportAsHtmlCommand() {
+  async exportAsHtmlCommand(e) {
     const {
       exportMultipleNotesAsHtml,
       exportNoteAsHtml
     } = require('./exporter')
     const { noteListBar, notes } = inkdrop.store.getState()
     const { actionTargetNoteIds } = noteListBar
-    if (actionTargetNoteIds && actionTargetNoteIds.length > 1) {
+    const noteIds = e.detail?.noteId ? [e.detail.noteId] : actionTargetNoteIds
+    if (noteIds && noteIds.length > 1) {
       inkdrop.notifications.addInfo('Exporting notes started', {
         detail: 'It may take a while..',
         dismissable: true
       })
-      await exportMultipleNotesAsHtml(actionTargetNoteIds)
+      await exportMultipleNotesAsHtml(noteIds)
       inkdrop.notifications.addInfo('Exporting notes completed', {
         detail: '',
         dismissable: true
       })
-    } else if (actionTargetNoteIds.length === 1) {
-      const note = await Note.loadWithId(actionTargetNoteIds[0])
+    } else if (noteIds.length === 1) {
+      const note = await Note.loadWithId(noteIds[0])
       exportNoteAsHtml(note)
     } else {
       inkdrop.notifications.addError('No note opened', {
@@ -42,22 +43,24 @@ module.exports = {
     }
   },
 
-  async copyAsHtmlCommand() {
+  async copyAsHtmlCommand(e) {
     const { copyNoteAsHtml } = require('./exporter')
-    const { noteListBar, notes } = inkdrop.store.getState()
+    const { noteListBar } = inkdrop.store.getState()
     const { actionTargetNoteIds } = noteListBar
-    if (actionTargetNoteIds && actionTargetNoteIds.length > 0) {
-      const note = await Note.loadWithId(actionTargetNoteIds[0])
+    const noteId = e.detail?.noteId || actionTargetNoteIds?.[0]
+    if (noteId) {
+      const note = await Note.loadWithId(noteId)
       copyNoteAsHtml(note)
     }
   },
 
-  async copyAsSimpleHtmlCommand() {
+  async copyAsSimpleHtmlCommand(e) {
     const { copyNoteAsSimpleHtml } = require('./exporter')
-    const { noteListBar, notes } = inkdrop.store.getState()
+    const { noteListBar } = inkdrop.store.getState()
     const { actionTargetNoteIds } = noteListBar
-    if (actionTargetNoteIds && actionTargetNoteIds.length > 0) {
-      const note = await Note.loadWithId(actionTargetNoteIds[0])
+    const noteId = e.detail?.noteId || actionTargetNoteIds?.[0]
+    if (noteId) {
+      const note = await Note.loadWithId(noteId)
       copyNoteAsSimpleHtml(note)
     }
   },
