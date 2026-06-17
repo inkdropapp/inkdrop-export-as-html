@@ -19,9 +19,9 @@ module.exports = {
       exportMultipleNotesAsHtml,
       exportNoteAsHtml
     } = require('./exporter')
-    const { noteListBar, notes } = inkdrop.store.getState()
+    const { noteListBar, editingNote } = inkdrop.store.getState()
     const { actionTargetNoteIds } = noteListBar
-    const noteIds = e.detail?.noteId ? [e.detail.noteId] : actionTargetNoteIds
+    const noteIds = e.detail?.noteId ? [e.detail.noteId] : (actionTargetNoteIds.length > 0 ? actionTargetNoteIds : [editingNote?._id])
     if (noteIds && noteIds.length > 1) {
       inkdrop.notifications.addInfo('Exporting notes started', {
         detail: 'It may take a while..',
