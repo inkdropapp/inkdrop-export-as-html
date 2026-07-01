@@ -33,7 +33,6 @@ async function exportMultipleNotesAsHtml(noteIds) {
 
 async function exportNoteAsHtml(note, pathToSave) {
   if (typeof pathToSave !== 'string') {
-    console.error('showSave dialog:', `${note.title}.html`)
     const res = await inkdrop.dialog.showSaveDialog({
       title: 'Save HTML file',
       defaultPath: `${note.title}.html`,
