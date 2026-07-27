@@ -8,9 +8,6 @@
   },
   "main": "index",
   "styleSheets": [],
-  "dependencies": {
-    "sanitize-filename": "^1.6.3"
-  },
   "engines": {
     "inkdrop": "^6.x"
   }

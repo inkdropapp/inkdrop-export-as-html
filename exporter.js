@@ -1,7 +1,6 @@
 const { clipboard } = require('electron')
 const { logger, exportUtils } = require('inkdrop')
 const path = require('path')
-const sanitize = require('sanitize-filename')
 const fs = require('fs')
 const { Note } = require('inkdrop').models
 
@@ -21,12 +20,22 @@ async function exportMultipleNotesAsHtml(noteIds) {
   if (res instanceof Array && res.length > 0) {
     const destDir = res[0]
 
-    for (let noteId of noteIds) {
-      const note = await Note.loadWithId(noteId)
-      if (note) {
-        const fileName = `${note.title}.html`
-        await exportUtils.exportNoteAsHtml(note, destDir, fileName)
+    try {
+      for (let noteId of noteIds) {
+        const note = await Note.loadWithId(noteId)
+        if (note) {
+          const fileName = exportUtils.sanitizeFileName(note.title, {
+            extension: '.html'
+          })
+          await exportUtils.exportNoteAsHtml(note, destDir, fileName)
+        }
       }
+    } catch (e) {
+      logger.error('Failed to export notes:', e)
+      inkdrop.notifications.addError('Failed to export notes', {
+        detail: e.message,
+        dismissable: true
+      })
     }
   }
 }
@@ -126,7 +135,7 @@ async function exportNotesInBook(bookId) {
 async function exportBook(parentDir, book, opts = {}) {
   const { createBookDir = true } = opts
   const db = inkdrop.localDB
-  const dirName = sanitize(book.name, { replacement: '-' })
+  const dirName = exportUtils.sanitizeFileName(book.name, { replacement: '-' })
   const pathToSave = createBookDir ? path.join(parentDir, dirName) : parentDir
   const { docs: notes } = await db.notes.findInBook(book._id, {
     limit: false
