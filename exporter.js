@@ -1,4 +1,3 @@
-const { clipboard } = require('electron')
 const { logger, exportUtils } = require('inkdrop')
 const path = require('path')
 const fs = require('fs')
@@ -12,8 +11,8 @@ module.exports = {
   exportNotesInBook
 }
 
-async function exportMultipleNotesAsHtml(noteIds) {
-  const { filePaths: res } = await inkdrop.dialog.showOpenDialog({
+async function exportMultipleNotesAsHtml(env, noteIds) {
+  const { filePaths: res } = await env.dialog.showOpenDialog({
     title: 'Select Destination Directory',
     properties: ['openDirectory']
   })
@@ -32,7 +31,7 @@ async function exportMultipleNotesAsHtml(noteIds) {
       }
     } catch (e) {
       logger.error('Failed to export notes:', e)
-      inkdrop.notifications.addError('Failed to export notes', {
+      env.notifications.addError('Failed to export notes', {
         detail: e.message,
         dismissable: true
       })
@@ -40,9 +39,9 @@ async function exportMultipleNotesAsHtml(noteIds) {
   }
 }
 
-async function exportNoteAsHtml(note, pathToSave) {
+async function exportNoteAsHtml(env, note, pathToSave) {
   if (typeof pathToSave !== 'string') {
-    const res = await inkdrop.dialog.showSaveDialog({
+    const res = await env.dialog.showSaveDialog({
       title: 'Save HTML file',
       defaultPath: `${note.title}.html`,
       filters: [
@@ -60,7 +59,7 @@ async function exportNoteAsHtml(note, pathToSave) {
       await exportUtils.exportNoteAsHtml(note, destDir, fileName)
     } catch (e) {
       logger.error('Failed to save HTML:', e)
-      inkdrop.notifications.addError('Failed to save as HTML', {
+      env.notifications.addError('Failed to save as HTML', {
         detail: e.message,
         dismissable: true
       })
@@ -68,54 +67,54 @@ async function exportNoteAsHtml(note, pathToSave) {
   }
 }
 
-async function copyNoteAsHtml(note) {
+async function copyNoteAsHtml(env, note) {
   try {
     const processor = await exportUtils.getProcessorForNote(note)
     if (!processor) return false
 
     await processor.replaceAttachmentImagesWithDataURI()
     const html = await processor.createHTMLWithTemplate(note.title)
-    clipboard.write({ html, text: html })
+    env.clipboard.write({ html, text: html })
   } catch (e) {
     logger.error('Failed to copy as html:', e)
-    inkdrop.notifications.addError('Failed to copy as html', {
+    env.notifications.addError('Failed to copy as html', {
       detail: e.message,
       dismissable: true
     })
   }
 }
 
-async function copyNoteAsSimpleHtml(note) {
+async function copyNoteAsSimpleHtml(env, note) {
   try {
     const processor = await exportUtils.getProcessorForNote(note)
     if (!processor) return false
 
     await processor.replaceAttachmentImagesWithDataURI()
     const html = await processor.stringifySimple()
-    clipboard.write({ html, text: html })
+    env.clipboard.write({ html, text: html })
   } catch (e) {
     logger.error('Failed to copy as simple html:', e)
-    inkdrop.notifications.addError('Failed to copy as simple html', {
+    env.notifications.addError('Failed to copy as simple html', {
       detail: e.message,
       dismissable: true
     })
   }
 }
 
-async function exportNotesInBook(bookId) {
-  const book = findNoteFromTree(bookId, inkdrop.store.getState().books.tree)
+async function exportNotesInBook(env, bookId) {
+  const book = findNoteFromTree(bookId, env.store.getState().books.tree)
   if (!book) {
     throw new Error('Notebook not found: ' + bookId)
   }
-  const { filePaths: pathArrayToSave } = await inkdrop.dialog.showOpenDialog({
+  const { filePaths: pathArrayToSave } = await env.dialog.showOpenDialog({
     title: `Select a directory to export a book "${book.name}"`,
     properties: ['openDirectory', 'createDirectory']
   })
   if (pathArrayToSave instanceof Array && pathArrayToSave.length > 0) {
     const [pathToSave] = pathArrayToSave
     try {
-      await exportBook(pathToSave, book, { createBookDir: false })
-      inkdrop.notifications.addInfo(
+      await exportBook(env, pathToSave, book, { createBookDir: false })
+      env.notifications.addInfo(
         `Finished exporting notes in "${book.name}"`,
         {
           detail: 'Directory: ' + pathToSave,
@@ -124,7 +123,7 @@ async function exportNotesInBook(bookId) {
       )
     } catch (e) {
       logger.error('Failed to export:', e)
-      inkdrop.notifications.addError('Failed to export', {
+      env.notifications.addError('Failed to export', {
         detail: e.message,
         dismissable: true
       })
@@ -132,9 +131,9 @@ async function exportNotesInBook(bookId) {
   }
 }
 
-async function exportBook(parentDir, book, opts = {}) {
+async function exportBook(env, parentDir, book, opts = {}) {
   const { createBookDir = true } = opts
-  const db = inkdrop.localDB
+  const db = env.localDB
   const dirName = exportUtils.sanitizeFileName(book.name, { replacement: '-' })
   const pathToSave = createBookDir ? path.join(parentDir, dirName) : parentDir
   const { docs: notes } = await db.notes.findInBook(book._id, {
@@ -148,7 +147,7 @@ async function exportBook(parentDir, book, opts = {}) {
 
   if (book.children) {
     await book.children.reduce((promise, childBook) => {
-      return promise.then(() => exportBook(pathToSave, childBook))
+      return promise.then(() => exportBook(env, pathToSave, childBook))
     }, Promise.resolve())
   }
 }
