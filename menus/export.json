@@ -29,7 +29,10 @@
       }
     ],
     ".sidebar-menu .sidebar-menu-book-list-item, .sidebar-book-filter-menu .sidebar-menu-book-list-item": [
-      { "label": "Export as HTML..", "command": "export-as-html:notebook" }
+      {
+        "label": "Export",
+        "submenu": [{ "label": "As HTML..", "command": "export-as-html:notebook" }]
+      }
     ]
   }
 }
