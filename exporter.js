@@ -136,9 +136,16 @@ async function exportBook(env, parentDir, book, opts = {}) {
   const db = env.localDB
   const dirName = exportUtils.sanitizeFileName(book.name, { replacement: '-' })
   const pathToSave = createBookDir ? path.join(parentDir, dirName) : parentDir
-  const { docs: notes } = await db.notes.findInBook(book._id, {
-    limit: false
-  })
+  const { rows } = await db.notes.query(
+    {
+      index: 'notes',
+      bookId: book._id,
+      status: ['none', 'active', 'onHold', 'completed', 'dropped'],
+      limit: false
+    },
+    { includeDocs: true }
+  )
+  const notes = rows.map(row => row.doc)
 
   !fs.existsSync(pathToSave) && fs.mkdirSync(pathToSave)
   for (let i = 0; i < notes.length; ++i) {
